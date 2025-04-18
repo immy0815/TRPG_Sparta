@@ -134,13 +134,14 @@ namespace TextRPG
                 // 이름 설정
                 Console.WriteLine(
                     "스파르타 마을에 오신 여러분 환영합니다.\n" +
-                    "원하시는 이름을 입력해주세요.\n");
+                    "원하시는 이름을 입력해주세요.");
 
+                Console.WriteLine();
                 string input = Console.ReadLine() ?? "";
 
                 Console.WriteLine(
                     "\n" +
-                    $"입력하신 이름은 [{input}]입니다.\n");
+                    $"입력하신 이름은 [{input}]입니다.");
 
                 // 메뉴 리스트 설정
                 var selections = new Dictionary<int, string>
@@ -173,7 +174,7 @@ namespace TextRPG
                 // 직업 설정
                 Console.WriteLine(
                     "스파르타 마을에 오신 여러분 환영합니다.\n" +
-                    "원하시는 직업을 선택해주세요.\n");
+                    "원하시는 직업을 선택해주세요.");
 
                 // 메뉴 리스트 설정
                 var selections = new Dictionary<int, string>();
@@ -212,7 +213,7 @@ namespace TextRPG
                 // 직업 설정
                 Console.WriteLine(
                     "스파르타 마을에 오신 여러분 환영합니다.\n" +
-                    "이곳에서 던전으로 들어가기 전 활동을 할 수 있습니다.\n");
+                    "이곳에서 던전으로 들어가기 전 활동을 할 수 있습니다.");
 
 
                 // 메뉴 리스트 설정
@@ -244,17 +245,18 @@ namespace TextRPG
                 Console.Clear();
 
                 Console.WriteLine(
-                    "스파르타 마을에 오신 여러분 환영합니다." +
+                    "스파르타 마을에 오신 여러분 환영합니다.\n" +
                     "캐릭터의 정보가 표시됩니다.");
 
                 // 상태보기
                 Console.WriteLine(
+                    "\n" +
                     $"Lv. {player.Level:D2}\n" +    //레벨
                     $"{player.Name} ( {GetClassNameToKor(player.Class)} )\n" + // 이름 (직업)
                     $"공격력 : {player.Atk} {ShowStatDiff(Stat.ATK)}\n" +  // 공격력
                     $"방어력 : {player.Def} {ShowStatDiff(Stat.DEF)}\n" +  // 방어력
                     $"체력 : {player.Hp} {ShowStatDiff(Stat.HP)}\n" +     // 체력
-                    $"Gold : {player.Gold} G\n");  // 골드
+                    $"Gold : {player.Gold} G");  // 골드
 
                 // 나가기 메뉴 표출
                 uiHelper.ShowMenuBack();
@@ -293,7 +295,7 @@ namespace TextRPG
 
                 Console.WriteLine(
                     "스파르타 마을에 오신 여러분 환영합니다.\n" +
-                    "보유 중인 아이템을 관리할 수 있습니다.\n");
+                    "보유 중인 아이템을 관리할 수 있습니다.");
 
                 // 아이템 목록 표출
                 uiHelper.ShowItemList(player.Inventory, false, true, false);
@@ -326,10 +328,10 @@ namespace TextRPG
                 Console.WriteLine(
                     "스파르타 마을에 오신 여러분 환영합니다.\n" +
                     "보유 중인 아이템을 관리할 수 있습니다.\n" +
-                    "아이템 번호를 입력하여 장착/해제 할 수 있습니다.\n");
+                    "아이템 번호를 입력하여 장착/해제 할 수 있습니다.");
 
                 // 보유 중인 아이템 목록 표출
-                uiHelper.ShowItemList(player.Inventory, false, true, false);
+                uiHelper.ShowItemList(player.Inventory, true, true, false);
 
                 // 나가기 메뉴 표출
                 uiHelper.ShowMenuBack();
@@ -356,14 +358,14 @@ namespace TextRPG
             }
             #endregion
 
-            #region Menu : Inventory Scene
+            #region Menu : Shop Scene
             void Shop()
             {
                 Console.Clear();
 
                 Console.WriteLine(
                     "스파르타 마을에 오신 여러분 환영합니다.\n" +
-                    "필요한 아이템을 얻을 수 있는 상점입니다.\n");
+                    "필요한 아이템을 얻을 수 있는 상점입니다.");
 
                 // 아이템 목록 표출
                 uiHelper.ShowItemList(itemList, false, false, true);
@@ -389,19 +391,26 @@ namespace TextRPG
                 }
             }
 
-            void Shop_Counter()
+            void Shop_Counter(string? buy_Comment = null)
             {
                 Console.Clear();
 
                 Console.WriteLine(
                     "스파르타 마을에 오신 여러분 환영합니다.\n" +
                     "필요한 아이템을 얻을 수 있는 상점입니다.\n" +
-                    "아이템의 번호를 입력하여 구매할 수 있습니다.\n");
+                    "아이템의 번호를 입력하여 구매할 수 있습니다.");
+
+                if (!string.IsNullOrEmpty(buy_Comment))
+                {
+                    Console.WriteLine(buy_Comment);
+                }
+
+                Console.WriteLine();
 
                 // 보유 골드
                 Console.WriteLine(
                     "[보유 골드]\n" +
-                    $"{player.Gold} G\n");
+                    $"{player.Gold} G");
 
                 // 아이템 목록 표출
                 uiHelper.ShowItemList(itemList, true, false, true);
@@ -411,32 +420,28 @@ namespace TextRPG
 
                 // 유저가 선택한 메뉴 번호에 따른 진행
                 int selection = uiHelper.GetUserSelection();
+                
                 if(selection == 0) { Shop(); }
                 else if(selection > 0) 
-                { 
-                    Shop();
-                    if (!player.Inventory.Contains(itemList[selection - 1]))
+                {
+                    Item selectedItem = itemList[selection - 1];
+
+                    if (!player.Inventory.Contains(selectedItem))
                     {
-                        if (player.Gold < itemList[selection - 1].Price)
+                        if (player.Gold < selectedItem.Price)
                         {
-                            Console.WriteLine("Gold가 부족합니다.");
+                            Shop_Counter("Gold가 부족합니다.");
                         }
                         else
                         {
-                            player.Gold -= itemList[selection - 1].Price;
-                            Console.WriteLine("구매를 완료했습니다.");
-                            player.Inventory.Add(itemList[selection - 1]);
+                            player.Gold -= selectedItem .Price;
+                            player.Inventory.Add(selectedItem);
+                            Shop_Counter("구매를 완료했습니다.");
                         }
                     }
-                    else { Console.WriteLine("이미 구매한 아이템입니다."); }
+                    else { Shop_Counter("이미 구매한 아이템입니다."); }
                 }
-                switch (uiHelper.GetUserSelection())
-                {
-                    case 0: 
-                        Console.WriteLine();
-                        break;
-                    default: Shop_Counter(); break;
-                }
+                else { Shop_Counter(); }
             }
 
             #endregion
@@ -461,7 +466,7 @@ namespace TextRPG
                     if (int.TryParse(input, out int number))
                     {
                         inputNum = number;
-                        Console.Clear();
+                        //Console.Clear();
                         break;
                     }
                     else continue;
@@ -472,21 +477,23 @@ namespace TextRPG
 
             public void ShowMenuSetting(Dictionary<int, string> selections)
             {
+                Console.WriteLine();
+
                 // 메뉴 텍스트 표출
                 for (int i = 1; i < selections.Count + 1; i++)
                 {
-                    Console.WriteLine($"[{i}] {selections[i]}\n");
+                    Console.WriteLine($"[{i}] {selections[i]}");
                 }
             }
 
             public void ShowMenuBack()
             {
-                Console.WriteLine("[0] 나가기");
+                Console.WriteLine("\n[0] 나가기");
             }
 
             public void ShowItemList(List<Item> items, bool showIndex = false, bool showEquip = false, bool showPurchase = false)
             {
-                Console.WriteLine("[아이템 목록]");
+                Console.WriteLine("\n[아이템 목록]");
                 int index = 1;
 
                 foreach (Item item in items)
